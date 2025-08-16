@@ -1,1 +1,169 @@
-loadstring("\112\114\105\110\116\40\34\32\89\79\85\82\32\83\67\82\73\80\84\32\72\69\82\69\33\33\32\34\41\10")()
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "Adana Rp Hub V1",
+    LoadingTitle = "Yükleniyor...",
+    LoadingSubtitle = "Adana Rp Hub | Peker GUI",
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "AdanaRpHubConfig",
+        FileName = "AdanaRpHubData"
+    },
+    Discord = {Enabled = false},
+    KeySystem = false
+})
+
+-- Main Tab
+local MainTab = Window:CreateTab("Main", 4483362458)
+
+-- Bankaya Işınlan
+MainTab:CreateButton({
+    Name = "Bankaya Işınlan",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local hedef = Vector3.new(42, 117, 201)
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart", 5)
+        if hrp then
+            hrp.CFrame = CFrame.new(hedef)
+            Rayfield:Notify({
+                Title = "Adana Rp Hub",
+                Content = "Bankanın kapısı açıksa ışınlanabilirsiniz",
+                Duration = 10
+            })
+        end
+    end
+})
+
+-- ESP
+MainTab:CreateButton({
+    Name = "ESP",
+    Callback = function()
+        loadstring(game:HttpGet("https://obj.wearedevs.net/2/scripts/WRD%20ESP.lua"))()
+    end
+})
+
+-- Noclip
+MainTab:CreateButton({
+    Name = "Noclip",
+    Callback = function()
+        loadstring(game:HttpGet("https://obj.wearedevs.net/197981/scripts/roblox%20noclip%20GUI.lua"))()
+    end
+})
+
+-- Fly
+MainTab:CreateButton({
+    Name = "Fly",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
+    end
+})
+
+-- Ölümsüz Ol
+MainTab:CreateButton({
+    Name = "Ölümsüz Ol",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/y0qHN0dw"))()
+        Rayfield:Notify({
+            Title = "Adana Rp Hub",
+            Content = "Ölümsüz mod aktifleştirildi!",
+            Duration = 10
+        })
+    end
+})
+
+-- Tool All
+MainTab:CreateButton({
+    Name = "Tool All",
+    Callback = function()
+        local Players = game:GetService("Players")
+        local LocalPlayer = Players.LocalPlayer
+        for _, v in pairs(game.Players:GetDescendants()) do
+            if v:IsA("Tool") then
+                v.Parent = LocalPlayer.Backpack
+            end
+        end
+        Rayfield:Notify({
+            Title = "Adana Rp Hub",
+            Content = "Tüm toollar alındı!",
+            Duration = 5
+        })
+    end
+})
+
+-- Aimbot (sadece PC - Q tuşu)
+MainTab:CreateButton({
+    Name = "Aimbot (Sadece PC) bastıktan sonra Q bas",
+    Callback = function()
+        local Players = game:GetService("Players")
+        local LocalPlayer = Players.LocalPlayer
+        local Mouse = LocalPlayer:GetMouse()
+        local Camera = workspace.CurrentCamera
+        local UIS = game:GetService("UserInputService")
+
+        local TeamCheck = true
+        local FOV = 200
+        local Smoothing = 0.12
+        local Aiming = false
+
+        function IsEnemy(Target)
+            if not Target.Character or not Target.Character:FindFirstChild("HumanoidRootPart") or not Target.Character:FindFirstChild("Humanoid") then return false end
+            if TeamCheck and Target.Team == LocalPlayer.Team then return false end
+            if Target.Character.Humanoid.Health < 1 then return false end
+            return true
+        end
+
+        function GetClosest()
+            local Closest = nil
+            local ClosestDistance = FOV
+            for _,v in pairs(Players:GetPlayers()) do
+                if v ~= LocalPlayer and IsEnemy(v) then
+                    local Root = v.Character:FindFirstChild("HumanoidRootPart")
+                    if Root then
+                        local Pos, OnScreen = Camera:WorldToViewportPoint(Root.Position)
+                        if OnScreen then
+                            local Dist = (Vector2.new(Pos.X,Pos.Y) - Vector2.new(Mouse.X,Mouse.Y)).magnitude
+                            if Dist < ClosestDistance then
+                                ClosestDistance = Dist
+                                Closest = Root
+                            end
+                        end
+                    end
+                end
+            end
+            return Closest
+        end
+
+        -- PC: Q ile aç/kapa
+        UIS.InputBegan:Connect(function(input)
+            if input.KeyCode == Enum.KeyCode.Q then
+                Aiming = true
+            end
+        end)
+        UIS.InputEnded:Connect(function(input)
+            if input.KeyCode == Enum.KeyCode.Q then
+                Aiming = false
+            end
+        end)
+
+        game:GetService("RunService").RenderStepped:Connect(function()
+            if Aiming then
+                local Target = GetClosest()
+                if Target then
+                    local Pos = Camera:WorldToViewportPoint(Target.Position)
+                    local mousemove = Vector2.new((Pos.X - Mouse.X) * Smoothing, (Pos.Y - Mouse.Y) * Smoothing)
+                    mousemoverel(mousemove.X, mousemove.Y)
+                end
+            end
+        end)
+
+        function mousemoverel(x, y)
+            local vu = game:GetService("VirtualUser")
+            vu:CaptureController()
+            mousemoveabs(Mouse.X + x, Mouse.Y + y)
+        end
+        function mousemoveabs(x, y)
+            game:GetService("VirtualInputManager"):SendMouseMove(x, y)
+        end
+    end
+})
